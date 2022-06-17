@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"Golang-Book-Author-API/errs"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
@@ -31,6 +32,23 @@ func (d AuthorRepositoryDb) FindAll() ([]Author, error) {
 		authors = append(authors, a)
 	}
 	return authors, nil
+}
+
+func (d AuthorRepositoryDb) ById(id string) (*Author, *errs.AppError) {
+	customerSql := "select author_id, name, birthplace, movement from authors where author_id = ?"
+
+	row := d.client.QueryRow(customerSql, id)
+	var a Author
+	err := row.Scan(&a.Id, &a.Name, &a.Birthplace, &a.Movement)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errs.NewNotFoundError("author not found")
+		} else {
+			log.Println("Error while scanning author " + err.Error())
+			return nil, errs.NewUnexpectedError("unexpected database error")
+		}
+	}
+	return &a, nil
 }
 
 func NewAuthorRepositoryDb() AuthorRepositoryDb {

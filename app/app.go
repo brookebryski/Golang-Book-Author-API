@@ -16,6 +16,7 @@ func Start() {
 	ah := AuthorHandlers{service.NewAuthorService(domain.NewAuthorRepositoryDb())}
 	// define routes
 	router.HandleFunc("/authors", ah.getAllAuthors).Methods(http.MethodGet)
+	router.HandleFunc("/authors/{author_id:[0-9]+}", ah.getAuthor).Methods(http.MethodGet)
 
 	// starting server
 	log.Fatalln(http.ListenAndServe("localhost:8080", router))

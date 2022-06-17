@@ -1,5 +1,7 @@
 package domain
 
+import "Golang-Book-Author-API/errs"
+
 type Author struct {
 	Id         string
 	Name       string
@@ -9,4 +11,5 @@ type Author struct {
 
 type AuthorRepository interface {
 	FindAll() ([]Author, error)
+	ById(string) (*Author, *errs.AppError)
 }
