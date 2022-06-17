@@ -4,16 +4,9 @@ import (
 	"Golang-Book-Author-API/service"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 )
-
-type Author struct {
-	Name       string `json:"full_name" xml:"name"`
-	Birthplace string `json:"birthplace" xml:"city"`
-	Movement   string `json:"movement" xml:"zipcode"`
-}
 
 type AuthorHandlers struct {
 	service service.AuthorService
@@ -37,10 +30,16 @@ func (ah *AuthorHandlers) getAuthor(w http.ResponseWriter, r *http.Request) {
 
 	author, err := ah.service.GetAuthor(id)
 	if err != nil {
-		w.WriteHeader(err.Code)
-		fmt.Fprintf(w, err.Message)
+		writeResponse(w, err.Code, err.AsMessage())
 	} else {
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(author)
+		writeResponse(w, http.StatusOK, author)
+	}
+}
+
+func writeResponse(w http.ResponseWriter, code int, data interface{}) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(code)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		panic(err)
 	}
 }
