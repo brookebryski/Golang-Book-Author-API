@@ -2,12 +2,13 @@ package service
 
 import (
 	"Golang-Book-Author-API/domain"
+	"Golang-Book-Author-API/dto"
 	"Golang-Book-Author-API/errs"
 )
 
 type AuthorService interface {
 	GetAllAuthors() ([]domain.Author, error)
-	GetAuthor(string) (*domain.Author, *errs.AppError)
+	GetAuthor(string) (*dto.AuthorResponse, *errs.AppError)
 }
 
 type DefaultAuthorService struct {
@@ -18,8 +19,13 @@ func (s DefaultAuthorService) GetAllAuthors() ([]domain.Author, error) {
 	return s.repo.FindAll()
 }
 
-func (s DefaultAuthorService) GetAuthor(id string) (*domain.Author, *errs.AppError) {
-	return s.repo.ById(id)
+func (s DefaultAuthorService) GetAuthor(id string) (*dto.AuthorResponse, *errs.AppError) {
+	a, err := s.repo.ById(id)
+	if err != nil {
+		return nil, err
+	}
+	response := a.ToDto()
+	return &response, nil
 }
 
 func NewAuthorService(repository domain.AuthorRepository) DefaultAuthorService {
