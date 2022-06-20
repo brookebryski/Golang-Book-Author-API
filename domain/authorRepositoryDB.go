@@ -5,6 +5,7 @@ import (
 	"Golang-Book-Author-API/logger"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"time"
 )
 
@@ -14,7 +15,6 @@ type AuthorRepositoryDb struct {
 
 func (d AuthorRepositoryDb) FindAll() ([]Author, error) {
 	findAllSql := "select author_id, name, birthplace, movement from authors"
-
 	rows, err := d.client.Query(findAllSql)
 	if err != nil {
 		logger.Error("Error while querying author table " + err.Error())
@@ -22,14 +22,10 @@ func (d AuthorRepositoryDb) FindAll() ([]Author, error) {
 	}
 
 	authors := make([]Author, 0)
-	for rows.Next() {
-		var a Author
-		err := rows.Scan(&a.Id, &a.Name, &a.Birthplace, &a.Movement)
-		if err != nil {
-			logger.Error("Error while scanning authors " + err.Error())
-			return nil, err
-		}
-		authors = append(authors, a)
+	err = sqlx.StructScan(rows, &authors)
+	if err != nil {
+		logger.Error("Error while scanning authors " + err.Error())
+		return nil, err
 	}
 	return authors, nil
 }
